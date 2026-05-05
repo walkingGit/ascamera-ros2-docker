@@ -1,0 +1,79 @@
+<mujoco model="BMS Lab - CityU">
+  <compiler angle="degree"/>
+
+  <default>
+    <geom type="box" density="500"/>
+  </default>
+
+  <worldbody>
+    <light pos="2 2 3" directional="true" diffuse="1 1 1"/>
+    <light pos="-2 -2 3" directional="true" diffuse=".6 .6 .6"/>
+
+    <!-- Floor -->
+    <geom name="floor" type="plane" size="2 2 0.01" rgba=".7 .7 .7 1"/>
+
+    <!-- Lab Table -->
+    <body name="table" pos="0 0 0.75">
+      <geom name="table_top" type="box" size="0.6 0.3 0.02" rgba=".9 .9 .85 1"/>
+      <geom name="leg1" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="-0.55 -0.25 -0.75"/>
+      <geom name="leg2" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="0.55 -0.25 -0.75"/>
+      <geom name="leg3" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="-0.55 0.25 -0.75"/>
+      <geom name="leg4" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="0.55 0.25 -0.75"/>
+
+      <!-- Red dot target on stand (on table) -->
+      <body name="target_stand" pos="-0.15 0.1 0">
+        <geom name="stand_pole" type="cylinder" size="0.003 0.12" rgba=".4 .4 .4 1" pos="0 0 0.06"/>
+        <geom name="red_dot" type="sphere" size="0.006" rgba="1 0 0 1" pos="0 0 0.13"/>
+      </body>
+
+      <!-- Petri dish (on table) -->
+      <body name="petri_dish" pos="-0.35 -0.15 0">
+        <geom type="cylinder" size="0.025 0.004" rgba=".85 .85 .9 0.6"/>
+      </body>
+
+      <!-- Tube rack (on table) -->
+      <body name="tube_rack" pos="-0.3 0.18 0">
+        <geom type="box" size="0.04 0.015 0.01" rgba=".3 .5 .8 1"/>
+        <geom name="t1" type="cylinder" size="0.004 0.02" rgba=".9 .9 .9 0.5" pos="-0.02 0 0.02"/>
+        <geom name="t2" type="cylinder" size="0.004 0.02" rgba=".9 .9 .9 0.5" pos="0 0 0.02"/>
+        <geom name="t3" type="cylinder" size="0.004 0.02" rgba=".9 .9 .9 0.5" pos="0.02 0 0.02"/>
+      </body>
+
+      <!-- ===== MyCobot Pro 450 Arm on table ===== -->
+      <body name="arm_base" pos="0.35 -0.12 0">
+        <geom type="cylinder" size="0.05 0.01" rgba=".6 .6 .6 1"/>
+        <geom type="cylinder" size="0.035 0.15" rgba=".8 .3 .3 1" pos="0 0 0.075"/>
+
+        <body name="link1" pos="0 0 0.15">
+          <geom size="0.025" type="sphere" rgba=".3 .8 .3 1"/>
+          <joint name="joint1" type="hinge" axis="0 0 1" limited="true" range="-162 162"/>
+
+          <body name="link2" pos="0 -0.048 0">
+            <geom fromto="0 0 0 0 0 0.180" size="0.02" rgba=".3 .3 .8 1"/>
+            <joint name="joint2" type="hinge" axis="0 1 0" limited="true" range="-125 125"/>
+
+            <body name="link3" pos="-0.010 0 0.180">
+              <geom fromto="0 0 0 0 0 0.173" size="0.018" rgba=".8 .8 .3 1"/>
+              <joint name="joint3" type="hinge" axis="0 1 0" limited="true" range="-154 154"/>
+
+              <body name="link4" pos="0 0 0.173">
+                <geom size="0.015" type="sphere" rgba=".3 .8 .8 1"/>
+                <joint name="joint4" type="hinge" axis="1 0 0" limited="true" range="-162 162"/>
+
+                <body name="link5" pos="0.0455 0 0.097">
+                  <geom size="0.012" type="sphere" rgba=".8 .3 .8 1"/>
+                  <joint name="joint5" type="hinge" axis="0 1 0" limited="true" range="-162 162"/>
+
+                  <body name="link6" pos="0 0.040 0">
+                    <geom fromto="0 0 0 0 0 0.05" size="0.008" rgba=".5 .5 .5 1"/>
+                    <joint name="joint6" type="hinge" axis="1 0 0" limited="true" range="-165 165"/>
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+</mujoco>

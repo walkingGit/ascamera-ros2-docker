@@ -1,0 +1,60 @@
+<mujoco model="BMS Lab - CityU">
+  <compiler angle="degree"/>
+
+  <default>
+    <geom type="box" density="500"/>
+  </default>
+
+  <worldbody>
+    <light pos="2 2 3" directional="true" diffuse="1 1 1"/>
+    <light pos="-2 -2 3" directional="true" diffuse=".6 .6 .6"/>
+
+    <!-- Floor -->
+    <geom name="floor" type="plane" size="2 2 0.01" rgba=".7 .7 .7 1"/>
+
+    <!-- Lab Table: 120cm x 60cm x 75cm -->
+    <body name="table" pos="0 0 0.75">
+      <geom name="table_top" type="box" size="0.6 0.3 0.02" rgba=".9 .9 .85 1" pos="0 0 0"/>
+      <!-- Table legs -->
+      <geom name="leg1" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="-0.55 -0.25 -0.75"/>
+      <geom name="leg2" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="0.55 -0.25 -0.75"/>
+      <geom name="leg3" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="-0.55 0.25 -0.75"/>
+      <geom name="leg4" type="cylinder" size="0.015 0.73" rgba=".5 .5 .5 1" pos="0.55 0.25 -0.75"/>
+    </body>
+
+    <!-- MyCobot Pro 450 Arm (mounted on table) -->
+    <body name="arm_base" pos="0.4 -0.15 0.77">
+      <geom name="base_plate" type="cylinder" size="0.06 0.01" rgba=".6 .6 .6 1" pos="0 0 0"/>
+      <geom name="arm_base_col" type="cylinder" size="0.04 0.20" rgba=".8 .3 .3 1" pos="0 0 0.1"/>
+    </body>
+
+    <!-- Red dot target on a stand -->
+    <body name="target_stand" pos="-0.2 0.15 0.77">
+      <!-- Stand pole -->
+      <geom name="stand_pole" type="cylinder" size="0.005 0.15" rgba=".6 .6 .6 1" pos="0 0 0.075"/>
+      <!-- Red dot (sphere) -->
+      <geom name="red_dot" type="sphere" size="0.008" rgba="1 0 0 1" pos="0 0 0.16"/>
+    </body>
+
+    <!-- Petri dish on table -->
+    <body name="petri_dish" pos="-0.25 -0.2 0.77">
+      <geom name="dish_bottom" type="cylinder" size="0.03 0.005" rgba=".85 .85 .9 0.7" pos="0 0 0"/>
+      <geom name="dish_lid" type="cylinder" size="0.032 0.003" rgba=".9 .9 .95 0.5" pos="0 0 0.008"/>
+    </body>
+
+    <!-- Eppendorf tube rack -->
+    <body name="tube_rack" pos="-0.3 0.25 0.77">
+      <!-- Rack body -->
+      <geom name="rack_base" type="box" size="0.04 0.02 0.015" rgba=".3 .5 .8 1" pos="0 0 0"/>
+      <!-- Row of tubes -->
+      <geom name="tube1" type="cylinder" size="0.005 0.025" rgba=".9 .9 .9 0.6" pos="-0.02 0 0.025"/>
+      <geom name="tube2" type="cylinder" size="0.005 0.025" rgba=".9 .9 .9 0.6" pos="0 0 0.025"/>
+      <geom name="tube3" type="cylinder" size="0.005 0.025" rgba=".9 .9 .9 0.6" pos="0.02 0 0.025"/>
+    </body>
+
+    <!-- Pipette tips box -->
+    <body name="tips_box" pos="-0.35 -0.1 0.77">
+      <geom name="box_body" type="box" size="0.025 0.02 0.02" rgba=".7 .7 .2 1" pos="0 0 0.01"/>
+    </body>
+  </worldbody>
+</mujoco>
