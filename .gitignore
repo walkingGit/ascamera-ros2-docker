@@ -3,3 +3,4 @@ meshes/*.dae
 !mycobot_pro_450_fixed.urdf
 !mycobot_pro_450_force_gripper_fixed.urdf
 PRO450DH.pdf
+PRO450.SLDASM

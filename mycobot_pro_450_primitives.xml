@@ -9,29 +9,40 @@
     <light pos="1 1 2" diffuse="1 1 1"/>
     <geom name="floor" type="plane" size="1 1 0.1" rgba=".8 .8 .8 1"/>
 
-    <!-- Base column. Child body pos = joint origin -->
+    <!-- Base: height 210mm from URDF -->
     <body name="base" pos="0 0 0">
-      <geom name="base_col" fromto="0 0 0 0 0 0.27" size="0.04" rgba=".8 .3 .3 1"/>
+      <geom name="base_col" fromto="0 0 0 0 0 0.210" size="0.05" rgba=".8 .3 .3 1"/>
 
-      <body name="link1" pos="0 0 0.27">
-        <geom name="j1" pos="0 0 0.03" size="0.03" type="sphere" rgba=".3 .8 .3 1"/>
+      <!-- J1 joint (Z-axis rotation) at top of base -->
+      <body name="link1" pos="0 0 0.210">
+        <geom name="j1" pos="0 0 0.03" size="0.035" type="sphere" rgba=".3 .8 .3 1"/>
         <joint name="joint1" type="hinge" axis="0 0 1" limited="true" range="-162 162"/>
 
-        <body name="link2" pos="0 0 0.06">
-          <geom name="upper_arm" fromto="0 0 0 0 0 0.138" size="0.03" rgba=".3 .3 .8 1"/>
+        <!-- J2: shoulder offset (0, -48, 0) from URDF -->
+        <body name="link2" pos="0 -0.048 0">
+          <geom name="upper_arm" fromto="0 0 0 0 0 0.180" size="0.03" rgba=".3 .3 .8 1"/>
           <joint name="joint2" type="hinge" axis="0 1 0" limited="true" range="-125 125"/>
 
-          <body name="link3" pos="0 0 0.138">
-            <geom name="forearm" fromto="0 0 0 0 0 0.138" size="0.025" rgba=".8 .8 .3 1"/>
+          <!-- J3: elbow at top of upper arm -->
+          <body name="link3" pos="-0.010 0 0.180">
+            <geom name="forearm" fromto="0 0 0 0 0 0.173" size="0.025" rgba=".8 .8 .3 1"/>
             <joint name="joint3" type="hinge" axis="0 1 0" limited="true" range="-154 154"/>
 
-            <body name="link4" pos="0 0 0.138">
+            <!-- J4: wrist at top of forearm -->
+            <body name="link4" pos="0 0 0.173">
               <geom name="wrist" size="0.02" type="sphere" rgba=".3 .8 .8 1"/>
               <joint name="joint4" type="hinge" axis="1 0 0" limited="true" range="-162 162"/>
 
-              <body name="link5" pos="0 0 0">
-                <geom name="end" fromto="0 0 0 0 0 0.1" size="0.012" rgba=".5 .5 .5 1"/>
+              <!-- J5: wrist pitch -->
+              <body name="link5" pos="0.0455 0 0.097">
+                <geom name="wrist_pitch" size="0.015" type="sphere" rgba=".8 .3 .8 1"/>
                 <joint name="joint5" type="hinge" axis="0 1 0" limited="true" range="-162 162"/>
+
+                <!-- J6 + end effector -->
+                <body name="link6" pos="0 0.040 0">
+                  <geom name="end" fromto="0 0 0 0 0 0.06" size="0.01" rgba=".5 .5 .5 1"/>
+                  <joint name="joint6" type="hinge" axis="1 0 0" limited="true" range="-165 165"/>
+                </body>
               </body>
             </body>
           </body>
