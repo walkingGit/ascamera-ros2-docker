@@ -1,0 +1,4 @@
+meshes/*.dae
+*.urdf
+!mycobot_pro_450_fixed.urdf
+!mycobot_pro_450_force_gripper_fixed.urdf
