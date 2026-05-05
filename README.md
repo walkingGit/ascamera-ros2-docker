@@ -86,3 +86,27 @@ docker exec robot ros2 topic echo /mycobot/coords --once
 ```bash
 docker exec robot ros2 topic hz /camera_publisher/depth0/image_raw
 ```
+
+## Official MyCobot Pro 450 Specifications
+
+Source: https://docs.elephantrobotics.com/docs/mycobot-pro450-en/1-ProductInformation/2.ProductParameter/2-ProductParameters.html
+
+| Spec | Value |
+|------|-------|
+| Working Radius | 450mm |
+| Payload | 1kg |
+| Repeatability | ±0.1mm |
+| Weight | <5kg |
+| DOF | 6 |
+| Communication | TCP/IP, MODBUS, Ethernet/IP |
+
+### Joint Limits (Software)
+
+| Joint | Range |
+|-------|-------|
+| J1 | ±162° |
+| J2 | ±125° |
+| J3 | ±154° |
+| J4 | ±162° |
+| J5 | ±162° |
+| J6 | ±165° |
