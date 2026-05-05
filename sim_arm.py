@@ -1,24 +1,38 @@
 #!/usr/bin/env python3
-"""Simple MuJoCo simulation for MyCobot Pro 450"""
-import mujoco
+"""MuJoCo simulation for MyCobot Pro 450"""
 import numpy as np
 
-xml = open('mycobot_pro_450_primitives.xml').read()
-model = mujoco.MjModel.from_xml_string(xml)
-data = mujoco.MjData(model)
+try:
+    import mujoco
+    HAS_MUJOCO = True
+except ImportError:
+    HAS_MUJOCO = False
+    print("MuJoCo not installed. Run: pip install mujoco")
 
-def set_angles(deg):
-    for i in range(6):
-        data.qpos[i+7] = deg[i] / 180.0 * np.pi
-    mujoco.mj_forward(model, data)
-    return data.xpos[model.body('link6').id][:3]
+if HAS_MUJOCO:
+    model = mujoco.MjModel.from_xml_path('mycobot_pro_450_primitives.xml')
+    data = mujoco.MjData(model)
 
-# Test: bent posture
-pos = set_angles([0, -20, -30, 0, 0, -50])
-print(f"Bent: end effector at ({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})")
+    def set_angles(deg):
+        """Set joint angles in degrees, return end effector position in mm"""
+        for i, d in enumerate(deg):
+            data.qpos[model.jnt_qposadr[i]] = d / 180.0 * np.pi
+        mujoco.mj_forward(model, data)
+        return data.xpos[model.body('link5').id][:3] * 1000
 
-# Test: straight up
-pos = set_angles([0, 0, 0, 0, 0, -50])
-print(f"Straight: end effector at ({pos[0]:.2f}, {pos[1]:.2f}, {pos[2]:.2f})")
+    # Demo: move through known postures
+    for name, angles in [
+        ("Home (safe)", [0, 0, 0, 0, 0, 0]),
+        ("Bent posture", [0, -20, -30, 0, 0, 0]),
+        ("Extended", [0, 0, 0, 0, 0, 0]),
+        ("J1 rotation", [90, 0, 0, 0, 0, 0]),
+    ]:
+        pos = set_angles(angles)
+        print(f"{name:15s} angles={angles}  end_effector=({pos[0]:7.1f}, {pos[1]:7.1f}, {pos[2]:7.1f}) mm")
 
-print("\nTo render: python3 -m mujoco.viewer mycobot_pro_450_primitives.xml")
+    print("\nTo render: python3 -m mujoco.viewer mycobot_pro_450_primitives.xml")
+
+else:
+    print("Install MuJoCo: pip install mujoco")
+    print("Then run: python3 sim_arm.py")
+    print("To render: python3 -m mujoco.viewer mycobot_pro_450_primitives.xml")
