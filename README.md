@@ -1,84 +1,101 @@
 # Nuwa-HP60C + MyCobot Pro 450 All-in-One Docker
 
-## How to Control the Arm
+## Architecture: How Arm Control Works
 
-### Option 1: Inside Docker (same container)
-
-Run the container with both nodes:
-
-```bash
-docker run --rm -it --privileged --network host robot-all-in-one \
-  bash -c "source /opt/ros/jazzy/setup.bash && source /workspace/ascam_ws/install/setup.bash && python3 /workspace/mycobot_bridge.py & ros2 run ascamera ascamera_node --ros-args -p confiPath:=/workspace/ascam_ws/src/ascamera/configurationfiles -p rgb_width:=640 -p rgb_height:=480 -p depth_width:=640 -p depth_height:=480 -p fps:=15 -p color_pcl:=false"
+```
+┌─────────────────────────────────────────────────┐
+│                  DOCKER CONTAINER                │
+│                                                  │
+│  ┌─────────────────┐     ┌──────────────────┐    │
+│  │  mycobot_bridge  │     │  ascamera_node   │    │
+│  │  (ROS2 node)     │     │  (ROS2 node)     │    │
+│  │                  │     │                  │    │
+│  │  Publishes:      │     │  Publishes:      │    │
+│  │  /mycobot/coords │     │  /camera/...     │    │
+│  │  /mycobot/angles │     │  /depth/...      │    │
+│  │                  │     │                  │    │
+│  │  Subscribes:     │     │                  │    │
+│  │  /mycobot/cmd_*  │     │                  │    │
+│  └────────┬─────────┘     └──────────────────┘    │
+│           │                                       │
+│           │ pymycobot (Python library)            │
+│           │                                       │
+│  ┌────────▼─────────┐                             │
+│  │ MyCobot Pro 450  │                             │
+│  │ 192.168.0.232    │                             │
+│  └──────────────────┘                             │
+└─────────────────────────────────────────────────┘
 ```
 
-Then in **another terminal** (also inside Docker):
+**The arm is controlled by ROS2 topics, but the bridge uses pymycobot (Python) internally.**
+
+## 3 Ways to Control
+
+### 1. ROS2 topic pub (most common)
 ```bash
-# Move arm to coordinates (preferred)
-ros2 topic pub --once /mycobot/cmd_coords geometry_msgs/Pose \
+docker exec robot_container ros2 topic pub --once /mycobot/cmd_coords geometry_msgs/Pose \
   "{position: {x: 307, y: -85, z: 507}, orientation: {x: -151.7, y: -29.5, z: -47.6}}"
-
-# Move arm with angles
-ros2 topic pub --once /mycobot/cmd_angles sensor_msgs/JointState \
-  "{position: [0, -20, -30, 0, 0, -50]}"
-
-# Gripper
-ros2 topic pub --once /mycobot/cmd_gripper std_msgs/String "data: 'open'"
-ros2 topic pub --once /mycobot/cmd_gripper std_msgs/String "data: 'close'"
-
-# Go home
-ros2 topic pub --once /mycobot/cmd_home std_msgs/Bool "data: true"
 ```
 
-### Option 2: From outside Docker (host machine)
-
-Run the container with ROS2 networking exposed:
-
-```bash
-docker run --rm -d --privileged --network host \
-  --name robot_container robot-all-in-one \
-  bash -c "source /opt/ros/jazzy/setup.bash && source /workspace/ascam_ws/install/setup.bash && python3 /workspace/mycobot_bridge.py"
-```
-
-Then from the **host machine** (or any machine on the network), install ROS2 and:
-```bash
-# Source the same ROS2 distro
-source /opt/ros/jazzy/setup.bash
-
-# Set ROS domain to match container
-export ROS_DOMAIN_ID=0
-
-# Now you can control the arm from the host!
-ros2 topic pub --once /mycobot/cmd_coords geometry_msgs/Pose \
-  "{position: {x: 307, y: -85, z: 507}, orientation: {x: -151.7, y: -29.5, z: -47.6}}"
-
-# Read arm status
-ros2 topic echo /mycobot/coords
-```
-
-### Option 3: Python script on host (no ROS2 needed on host)
-
+### 2. Python inside Docker (scripts in the container)
 ```python
+#!/usr/bin/env python3
 import rclpy
 from rclpy.node import Node
 from geometry_msgs.msg import Pose
 
-class ArmController(Node):
+class MyArm(Node):
     def __init__(self):
-        super().__init__('arm_controller')
+        super().__init__('arm_ctl')
         self.pub = self.create_publisher(Pose, '/mycobot/cmd_coords', 10)
-    
-    def move_to(self, x, y, z, rx, ry, rz):
+
+    def move(self, x, y, z, rx, ry, rz):
         msg = Pose()
         msg.position.x = x; msg.position.y = y; msg.position.z = z
         msg.orientation.x = rx; msg.orientation.y = ry; msg.orientation.z = rz
         self.pub.publish(msg)
 
 rclpy.init()
-node = ArmController()
-node.move_to(307, -85, 507, -151.7, -29.5, -47.6)
+arm = MyArm()
+arm.move(307, -85, 507, -151.7, -29.5, -47.6)
 ```
 
-## Topics Reference
+### 3. Python directly via pymycobot (inside container)
+```python
+from pymycobot import Pro450Client
+mc = Pro450Client('192.168.0.232', 4500)
+mc.send_coords([307, -85, 507, -151.7, -29.5, -47.6], 30)
+mc.set_pro_gripper_close()
+```
+
+**All 3 approaches work inside the container.** The ROS2 bridge just wraps pymycobot into ROS2 topics so everything (camera + arm) speaks the same language.
+
+## Quick Start
+
+```bash
+# Build
+docker build -t robot-all-in-one .
+```
+
+### Run everything:
+```bash
+docker run --rm -it --privileged --network host --name robot robot-all-in-one
+```
+
+### In another terminal, control the arm:
+```bash
+# Via ROS2 topic
+docker exec robot ros2 topic pub --once /mycobot/cmd_coords geometry_msgs/Pose \
+  "{position: {x: 307, y: -85, z: 507}, orientation: {x: -151.7, y: -29.5, z: -47.6}}"
+
+# Gripper
+docker exec robot ros2 topic pub --once /mycobot/cmd_gripper std_msgs/String "data: 'open'"
+
+# Check status
+docker exec robot ros2 topic echo /mycobot/coords --once
+```
+
+## Topics
 
 | Topic | Type | Direction | Description |
 |-------|------|-----------|-------------|
@@ -91,4 +108,3 @@ node.move_to(307, -85, 507, -151.7, -29.5, -47.6)
 | `/mycobot/gripper` | String | Receive | Gripper position (0-100) |
 | `/camera_publisher/depth0/image_raw` | Image | Receive | Depth 640×480 16-bit |
 | `/camera_publisher/rgb0/image` | Image | Receive | RGB 640×480 |
-| `/camera_publisher/depth0/points` | PointCloud2 | Receive | Point cloud |
